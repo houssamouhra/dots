@@ -1,0 +1,7 @@
+jid1-MnnxcxisBPnSXQ@jetpack
+sponsorBlocker@ajay.app
+{7a7a4a92-a2a0-41d1-9fd7-1e92480d612d}
+uBlock0@raymondhill.net
+idcac-pub@guus.ninja
+jid1-BoFifL9Vbdl2zQ@jetpack
+addon@darkreader.org

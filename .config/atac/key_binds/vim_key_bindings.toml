@@ -1,0 +1,82 @@
+# Avoid Ctrl-v: it pastes the clipboard and may trigger unwanted events.
+
+[keybindings.main_menu]
+exit = "q" # Ctrl-c is built in
+
+unselect_request = "h"
+expand_collection = "l"
+
+move_request_up = "Alt-k"
+move_request_down = "Alt-j"
+
+next_environment = "Shift-E"
+display_env_editor = "Ctrl-E"
+display_cookies = "Shift-C"
+display_logs = "Shift-L"
+
+[keybindings.generic]
+display_help = "Shift-h" # Available from any context
+
+# Text input: collection names, URLs, headers, query params, request bodies, etc.
+[keybindings.generic.text_input]
+quit_without_saving = "Esc"
+save_and_quit_single_line = "Enter"
+save_and_quit_area = "Ctrl-s"
+
+# Vim-style editing for text areas
+mode = "vim"
+
+# Navigation for tables, popups, and collections
+[keybindings.generic.navigation]
+move_cursor_up = "k"
+move_cursor_down = "j"
+move_cursor_left = "h"
+move_cursor_right = "l"
+
+# Alternate navigation for text input contexts
+alt_move_cursor_up = "Alt-k"
+alt_move_cursor_down = "Alt-j"
+alt_move_cursor_left = "Alt-h"
+alt_move_cursor_right = "Alt-l"
+
+go_back = "Esc"
+select = "Enter"
+
+# Actions for collections, query params, headers, and cookies
+[keybindings.generic.list_and_table_actions]
+create_element = "Shift-N"
+delete_element = "Shift-D"
+edit_element = "Enter"
+rename_element = "Shift-R"
+toggle_element = "Shift-T"
+duplicate_element = "Shift-Y"
+
+[keybindings.request_selected]
+param_next_tab = "Tab"
+
+change_url = "Shift-U"
+change_method = "Shift-M"
+request_settings = "Shift-S"
+
+next_view = "Shift-V"
+
+send_request = "Space"
+alt_send_request = "Ctrl-Enter"
+
+export_request = "Ctrl-e"
+
+[keybindings.request_selected.param_tabs]
+change_auth_method = "Shift-A"
+change_body_content_type = "Shift-B"
+change_message_type = "Shift-M"
+
+# Response navigation and actions
+[keybindings.request_selected.result_tabs]
+scroll_up = "Alt-k"
+scroll_down = "Alt-j"
+scroll_left = "Alt-h"
+scroll_right = "Alt-l"
+
+yank_response_part = "y" # Yank the current result tab
+
+result_next_tab = "Shift-BackTab" # Uses param_next_tab for the selected view

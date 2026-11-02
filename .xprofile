@@ -1,0 +1,19 @@
+#!/bin/sh
+
+# Start D-Bus session
+if [ -z "$DBUS_SESSION_BUS_ADDRESS" ]; then
+    eval "$(dbus-launch --sh-syntax --exit-with-session)"
+fi
+
+# Display / Hardware
+autorandr --change
+xset -b            # disable beep
+xset r rate 200 35 # keyboard repeat rate
+xsct 5000          # color temperature
+
+# Wallpaper
+xwallpaper --zoom ~/Pictures/walls/0083.jpg
+
+# Background processes
+batsignal -w 20 -c 10 -d 5 -e -s -b &
+picom &

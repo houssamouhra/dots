@@ -1,0 +1,4 @@
+.config/mpv/scripts/uosc/
+.config/tmux/plugins
+.config/atac/atac.log
+.config/atac/*.json

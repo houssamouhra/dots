@@ -1,0 +1,39 @@
+#!/bin/sh
+
+# Battery status for dwmblocks-async
+
+# Find first battery
+for bat in /sys/class/power_supply/BAT*; do
+    [ -r "$bat/capacity" ] || continue
+
+    capacity=$(cat "$bat/capacity")
+    status=$(cat "$bat/status")
+
+    # Dynamic icon based on capacity + status
+    if [ "$status" = "Charging" ]; then
+        icon="󱘖"
+    elif [ "$status" = "Full" ]; then
+        icon="󰁹"
+    else
+        # Discharging – change icon by percentage
+        if [ "$capacity" -ge 90 ]; then
+            icon="󰁹"
+        elif [ "$capacity" -ge 70 ]; then
+            icon="󰂁"
+        elif [ "$capacity" -ge 50 ]; then
+            icon="󰁿"
+        elif [ "$capacity" -ge 30 ]; then
+            icon="󰁽"
+        elif [ "$capacity" -ge 15 ]; then
+            icon="󰁻"
+        else
+            icon="󰂎"
+        fi
+    fi
+
+    printf "%s %s%%\n" "$icon" "$capacity"
+    exit 0
+done
+
+# No battery found
+printf "󰂑 N/A\n"

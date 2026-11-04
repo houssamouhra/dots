@@ -1,0 +1,57 @@
+#!/bin/sh
+
+# Network status for dwmblocks-async
+
+case $BLOCK_BUTTON in
+1) # left click → open network TUI (change to your preferred terminal/TUI)
+    setsid -f st -e cmtui >/dev/null 2>&1 &
+    ;;
+esac
+
+# Wi-Fi
+wifi_state=$(cat /sys/class/net/w*/operstate 2>/dev/null | head -n1)
+
+if [ "$wifi_state" = "up" ]; then
+    # Signal strength (0-100)
+    signal=$(awk '/^\s*w/ { print int($3 * 100 / 70) }' /proc/net/wireless 2>/dev/null)
+
+    case $signal in
+    [8-9][0-9] | 100) icon="󰤨" ;; # excellent
+    [6-7][0-9]) icon="󰤥" ;;       # good
+    [4-5][0-9]) icon="󰤢" ;;       # ok
+    [2-3][0-9]) icon="󰤟" ;;       # weak
+    *) icon="󰤯" ;;                # very weak
+    esac
+elif [ "$wifi_state" = "down" ]; then
+    # Check if the interface is just soft-blocked / disabled
+    if [ "$(cat /sys/class/net/w*/flags 2>/dev/null | head -n1)" = "0x1003" ]; then
+        icon="󰤫" # wifi disabled
+    else
+        icon="󰤮" # no connection
+    fi
+else
+    icon=""
+fi
+
+# Ethernet
+eth_state=$(cat /sys/class/net/e*/operstate 2>/dev/null | head -n1)
+
+if [ "$eth_state" = "up" ]; then
+    # Has an IP?
+    if ip -4 addr show | grep -q "inet "; then
+        eth_icon="󰌘"
+    else
+        eth_icon="󰈁" # linked but no IP
+    fi
+else
+    eth_icon=""
+fi
+
+# --- Final output (prefer ethernet if both are up) ---
+if [ -n "$eth_icon" ]; then
+    printf "%s\n" "$eth_icon"
+elif [ -n "$icon" ]; then
+    printf "%s\n" "$icon"
+else
+    printf "󰌙\n" # fully disconnected
+fi

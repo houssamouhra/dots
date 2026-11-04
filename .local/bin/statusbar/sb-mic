@@ -1,0 +1,36 @@
+#!/bin/sh
+
+# microphone status for dwmblocks-async
+
+get_vol() {
+    pamixer --default-source --get-volume
+}
+
+is_muted() {
+    [ "$(pamixer --default-source --get-mute)" = "true" ]
+}
+
+get_icon() {
+    vol=$(get_vol)
+
+    if is_muted || [ "$vol" -eq 0 ]; then
+        echo "󰍭" # muted mic
+    else
+        echo "󰍬" # active mic
+    fi
+}
+
+case $BLOCK_BUTTON in
+1) pamixer --default-source -t ;;   # toggle mute
+4) pamixer --default-source -i 5 ;; # +5%
+5) pamixer --default-source -d 5 ;; # -5%
+esac
+
+icon=$(get_icon)
+vol=$(get_vol)
+
+if is_muted || [ "$vol" -eq 0 ]; then
+    printf "%s\n" "$icon"
+else
+    printf "%s %s%%\n" "$icon" "$vol"
+fi

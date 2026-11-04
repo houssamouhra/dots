@@ -1,0 +1,27 @@
+#!/bin/sh
+
+# Bluetooth status for dwmblocks-async
+
+# Check Bluetooth power status
+powered=$(bluetoothctl show 2>/dev/null |
+    awk '/Powered:/ {print $2; exit}')
+
+if [ "$powered" != "yes" ]; then
+    printf "󰂲\n"
+    exit 0
+fi
+
+# Get connected devices
+devices=$(bluetoothctl devices Connected 2>/dev/null)
+
+# Count connections
+count=$(printf '%s\n' "$devices" |
+    awk '/^Device / {n++} END {print n+0}')
+
+# Display status
+if [ "$count" -gt 0 ]; then
+    printf "󰂱 %s\n" "$count"
+
+else
+    printf "󰂯\n"
+fi

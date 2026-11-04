@@ -16,4 +16,4 @@ xwallpaper --zoom ~/Pictures/walls/0083.jpg
 
 # Background processes
 batsignal -w 20 -c 10 -d 5 -e -s -b &
-picom &
+xcompmgr &

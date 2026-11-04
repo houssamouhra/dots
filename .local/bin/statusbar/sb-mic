@@ -11,26 +11,79 @@ is_muted() {
 }
 
 get_icon() {
-    vol=$(get_vol)
-
-    if is_muted || [ "$vol" -eq 0 ]; then
-        echo "󰍭" # muted mic
+    if is_muted; then
+        printf '%s' "󰍭"
     else
-        echo "󰍬" # active mic
+        printf '%s' "󰍬"
     fi
 }
 
-case $BLOCK_BUTTON in
-1) pamixer --default-source -t ;;   # toggle mute
-4) pamixer --default-source -i 5 ;; # +5%
-5) pamixer --default-source -d 5 ;; # -5%
+notify() {
+    command -v notify-send >/dev/null 2>&1 || return
+    vol=$(get_vol)
+
+    if is_muted; then
+        notify-send \
+            -e \
+            -h string:x-canonical-private-synchronous:mic_notif \
+            -u low \
+            "Microphone: Muted"
+    else
+        notify-send \
+            -e \
+            -h "int:value:$vol" \
+            -h string:x-canonical-private-synchronous:mic_notif \
+            -u low \
+            "Microphone: ${vol}%"
+    fi
+}
+
+toggle() {
+    pamixer --default-source -t
+    notify
+}
+
+inc() {
+    is_muted && pamixer --default-source -u
+    pamixer --default-source -i 5
+    notify
+}
+
+dec() {
+    is_muted && pamixer --default-source -u
+    pamixer --default-source -d 5
+    notify
+}
+
+# Command-line actions (dwm keybindings)
+case "${1:-}" in
+toggle | --toggle)
+    toggle
+    exit
+    ;;
+up | --inc)
+    inc
+    exit
+    ;;
+down | --dec)
+    dec
+    exit
+    ;;
 esac
 
+# Mouse actions (dwmblocks-async)
+case "${BLOCK_BUTTON:-}" in
+1) toggle ;;
+4) inc ;;
+5) dec ;;
+esac
+
+# Statusbar output
 icon=$(get_icon)
 vol=$(get_vol)
 
-if is_muted || [ "$vol" -eq 0 ]; then
-    printf "%s\n" "$icon"
+if is_muted; then
+    printf '%s\n' "$icon"
 else
-    printf "%s %s%%\n" "$icon" "$vol"
+    printf '%s %s%%\n' "$icon" "$vol"
 fi

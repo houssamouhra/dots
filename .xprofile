@@ -1,5 +1,8 @@
 #!/bin/sh
 
+# statusbar scripts path
+export PATH="$HOME/.local/bin/statusbar:$PATH"
+
 # Start D-Bus session
 if [ -z "$DBUS_SESSION_BUS_ADDRESS" ]; then
     eval "$(dbus-launch --sh-syntax --exit-with-session)"
@@ -16,4 +19,5 @@ xwallpaper --zoom ~/Pictures/walls/0083.jpg
 
 # Background processes
 batsignal -w 20 -c 10 -d 5 -e -s -b &
+clipmenud &
 xcompmgr &

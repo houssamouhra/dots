@@ -1,0 +1,26 @@
+#!/bin/sh
+
+cache="$HOME/.cache/dwmblocks-cpu"
+
+read -r _ user nice system idle iowait irq softirq steal _ </proc/stat
+
+total=$((user + nice + system + idle + iowait + irq + softirq + steal))
+idle=$((idle + iowait))
+
+if [ -f "$cache" ]; then
+    read -r old_total old_idle <"$cache"
+
+    delta_total=$((total - old_total))
+    delta_idle=$((idle - old_idle))
+
+    if [ "$delta_total" -gt 0 ]; then
+        usage=$((100 * (delta_total - delta_idle) / delta_total))
+        printf '%s%% 󰍛' "$usage"
+    else
+        printf '-- 󰍛'
+    fi
+else
+    printf '-- 󰍛'
+fi
+
+printf '%s %s\n' "$total" "$idle" >"$cache"

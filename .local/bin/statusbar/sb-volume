@@ -68,6 +68,22 @@ toggle() {
   notify
 }
 
+# Command-line actions (dwm keybindings)
+case "$1" in
+up)
+  inc
+  exit
+  ;;
+down)
+  dec
+  exit
+  ;;
+mute)
+  toggle
+  exit
+  ;;
+esac
+
 #  click handling (dwmblocks-async)
 case $BLOCK_BUTTON in
 1) toggle ;;                                    # left click  → mute/unmute

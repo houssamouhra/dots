@@ -1,0 +1,58 @@
+#!/bin/sh
+
+STEP=5
+
+get_brightness() {
+  brightnessctl -m |
+    awk -F, '{gsub(/%/, "", $4); print $4}'
+}
+
+change_brightness() {
+  brightnessctl -q set "${STEP}%$1"
+}
+
+notify_user() {
+  brightness=$(get_brightness)
+
+  notify-send \
+    -e \
+    -h "string:x-canonical-private-synchronous:brightness_notif" \
+    -h "int:value:$brightness" \
+    -u low \
+    "Brightness: ${brightness}%"
+}
+
+inc() {
+  change_brightness "+"
+  notify_user
+}
+
+dec() {
+  change_brightness "-"
+  notify_user
+}
+
+# Command-line actions (dwm keybindings)
+case "${1:-}" in
+--get)
+  get_brightness
+  exit
+  ;;
+--inc | up)
+  inc
+  exit
+  ;;
+--dec | down)
+  dec
+  exit
+  ;;
+esac
+
+# Mouse actions (dwmblocks-async)
+case "${BLOCK_BUTTON:-}" in
+4) inc ;;
+5) dec ;;
+esac
+
+# Statusbar output
+printf '󰃠 %s%%' "$(get_brightness)"

@@ -1,0 +1,34 @@
+#!/bin/sh
+
+CONFIG="$HOME/.config/i3lock/config"
+
+if [ ! -r "$CONFIG" ]; then
+    printf 'lock: cannot read %s\n' "$CONFIG" >&2
+    exit 1
+fi
+
+. "$CONFIG"
+
+exec i3lock \
+    --image="$WALLPAPER" \
+    --fill \
+    --color="$COLOR" \
+    --radius="$RADIUS" \
+    --ring-width="$THICKNESS" \
+    --inside-color="$INSIDE" \
+    --ring-color="$RING" \
+    --line-color="$LINE" \
+    --keyhl-color="$KEY_HL" \
+    --bshl-color="$BS_HL" \
+    --insidever-color="$INSIDE_VER" \
+    --ringver-color="$RING_VER" \
+    --verif-color="$VER_TEXT" \
+    --insidewrong-color="$INSIDE_WRONG" \
+    --ringwrong-color="$RING_WRONG" \
+    --wrong-color="$WRONG_TEXT" \
+    --modif-color="$MODIF_COLOR" \
+    --verif-font="$FONT" \
+    --verif-size="$FONT_SIZE" \
+    --wrong-font="$FONT" \
+    --wrong-size="$FONT_SIZE" \
+    --show-failed-attempts

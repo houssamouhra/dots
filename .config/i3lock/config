@@ -1,0 +1,31 @@
+# Background
+WALLPAPER="$HOME/.local/share/walls/04.jpg"
+COLOR="1a1b26ff"
+
+# Indicator
+RADIUS=120
+THICKNESS=8
+
+# Font
+FONT="Maple Mono NF"
+FONT_SIZE=24
+
+# Tokyo Night palette
+INSIDE="1a1b26ff"
+RING="7aa2f7ff"
+LINE="00000000"
+KEY_HL="9ece6aff"
+BS_HL="f7768eff"
+
+# Verifying
+INSIDE_VER="1a1b26ff"
+RING_VER="7aa2f7ff"
+VER_TEXT="c0caf5ff"
+
+# Wrong password
+INSIDE_WRONG="1a1b26ff"
+RING_WRONG="f7768eff"
+WRONG_TEXT="f7768eff"
+
+# Modifier / Caps Lock
+MODIF_COLOR="e0af68ff"

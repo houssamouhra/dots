@@ -90,12 +90,98 @@ while [ -f /var/lib/pacman/db.lck ]; do
 done
 
 # =============================================================================
+# Configure XLibre repository
+# =============================================================================
+
+configure_xlibre() {
+  info "Importing XLibre signing key..."
+
+  curl -fsSL "$XLIBRE_KEY_URL" \
+    -o "$TMP_DIR/xlibre-artixlinux.asc"
+
+  sudo pacman-key --add "$TMP_DIR/xlibre-artixlinux.asc"
+
+  info "Verifying XLibre signing key fingerprint..."
+
+  sudo pacman-key --finger "$XLIBRE_KEY_ID"
+
+  sudo pacman-key --lsign-key "$XLIBRE_KEY_ID"
+
+  success "XLibre signing key imported."
+
+  info "Configuring XLibre repository..."
+
+  if [ ! -f /etc/pacman.conf ]; then
+    error "/etc/pacman.conf not found."
+    return 1
+  fi
+
+  if ! grep -q '^\[system\]' /etc/pacman.conf ||
+    ! grep -q '^\[world\]' /etc/pacman.conf; then
+    error "Could not find [system] or [world] in pacman.conf."
+    return 1
+  fi
+
+  awk '
+        BEGIN {
+            skip = 0
+            inserted = 0
+            system_seen = 0
+            world_seen = 0
+        }
+
+        /^\[system\]$/ {
+            system_seen = NR
+        }
+
+        /^\[xlibre-stable\]$/ {
+            skip = 1
+            next
+        }
+
+        skip && /^\[/ {
+            skip = 0
+        }
+
+        !skip && /^\[world\]$/ {
+            world_seen = NR
+
+            if (!inserted) {
+                print "[xlibre-stable]"
+                print "Server = https://github.com/xlibre-artix/stable/releases/download/$arch"
+                print ""
+                inserted = 1
+            }
+        }
+
+        !skip {
+            print
+        }
+
+        END {
+            if (!system_seen || !world_seen ||
+                system_seen >= world_seen || !inserted) {
+                exit 1
+            }
+        }
+    ' /etc/pacman.conf >"$TMP_DIR/pacman.conf"
+
+  sudo install -o root -g root -m 644 \
+    "$TMP_DIR/pacman.conf" \
+    /etc/pacman.conf
+
+  success "XLibre repository configured."
+}
+
+configure_xlibre
+
+# =============================================================================
 # System update
 # =============================================================================
 
-info "Updating system..."
+info "Refreshing package databases and updating system..."
 
-sudo pacman -Syu --noconfirm
+sudo pacman -Syyu
 
 success "System updated."
 
@@ -242,9 +328,6 @@ install_pacman \
   libxinerama \
   libxrender \
   libxext \
-  xlibre-meta \
-  xlibre-xserver \
-  xlibre-input-libinput \
   xorg-xinit \
   xorg-xauth \
   xorg-xrandr \
@@ -261,12 +344,27 @@ install_pacman \
   autorandr \
   xwallpaper \
   xcolor \
-  xsct \
   xcompmgr \
   dunst \
   clipmenu
 
 success "Official packages installed."
+
+# =============================================================================
+# Install XLibre
+# =============================================================================
+
+info "Installing XLibre..."
+
+if pacman -Qq xlibre-meta >/dev/null 2>&1; then
+  success "XLibre is already installed."
+else
+  info "Installing XLibre meta package..."
+
+  sudo pacman -S xlibre-meta
+
+  success "XLibre installed."
+fi
 
 # =============================================================================
 # AUR packages
@@ -298,6 +396,8 @@ install_aur \
   diffnav \
   lazysql \
   mycli \
+  xsct \
+  i3lock-color \
   maplemono-nf \
   dislocker-mbedtls3
 

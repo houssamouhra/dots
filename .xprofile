@@ -15,7 +15,7 @@ xset r rate 200 35 # keyboard repeat rate
 xsct 5000          # color temperature
 
 # Wallpaper
-xwallpaper --zoom ~/Pictures/walls/0083.jpg
+xwallpaper --zoom ~/.local/share/walls/04.jpg
 
 # Background processes
 batsignal -w 20 -c 10 -d 5 -e -s -b &

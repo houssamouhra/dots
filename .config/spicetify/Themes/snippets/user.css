@@ -27,6 +27,12 @@ button:has(path[d="M11.196 8 6 5v6z"]) {
   display: none;
 }
 
+/* Hide "Your favorite artists" shelf on Home */
+section[aria-label="Your favorite artists"],
+section[data-testid="component-shelf"][aria-label="Your favorite artists"] {
+    display: none !important;
+}
+
 /* Remove all extra elements from now playing bar except song details */
 .main-nowPlayingView-section {
   display: none;

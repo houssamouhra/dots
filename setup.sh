@@ -6,10 +6,10 @@ set -eu
 DOTS_DIR=$(CDPATH= cd "$(dirname "$0")" && pwd)
 SUCKLESS_DIR="$HOME/.suckless"
 
-DWM_REPO="https://github.com/houssamouhra/dwm.git"
-ST_REPO="https://github.com/houssamouhra/st.git"
-DMENU_REPO="https://github.com/houssamouhra/dmenu.git"
-DWMBLOCKS_REPO="https://github.com/houssamouhra/dmwblocks.git"
+DWM_REPO="git@github.com:houssamouhra/dwm.git"
+ST_REPO="git@github.com:houssamouhra/st.git"
+DMENU_REPO="git@github.com:houssamouhra/dmenu.git"
+DWMBLOCKS_REPO="git@github.com:houssamouhra/dwmblocks.git"
 
 # Colors
 if [ -t 1 ]; then

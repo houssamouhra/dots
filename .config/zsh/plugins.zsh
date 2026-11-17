@@ -1,4 +1,4 @@
-# plugins.zsh: tiny plugin manager (clone on first use, load deferred)
+# tiny plugin manager (clone on first use, load deferred)
 
 typeset -gi _PLUGIN_LABEL_WIDTH=29
 

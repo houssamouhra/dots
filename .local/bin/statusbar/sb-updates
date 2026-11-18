@@ -1,0 +1,11 @@
+#!/bin/sh
+# Show the number of pending pacman and AUR updates.
+# Prints nothing when up to date, so the block disappears from the bar.
+
+repo=$(checkupdates 2>/dev/null | wc -l)
+aur=$(paru -Qua 2>/dev/null | wc -l)
+aur=0
+
+total=$((repo + aur))
+
+[ "$total" -gt 0 ] && echo " $total"

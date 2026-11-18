@@ -1,57 +1,62 @@
 #!/bin/sh
+# Network status for dwmblocks-async: "󰤨"
 
-# Network status for dwmblocks-async
-
-case $BLOCK_BUTTON in
-1) # left click → open network TUI (change to your preferred terminal/TUI)
-    setsid -f st -e cmtui >/dev/null 2>&1 &
-    ;;
+case "$BLOCK_BUTTON" in
+1) setsid -f st -e cmtui >/dev/null 2>&1 ;; # left click → network TUI
 esac
 
+eth_linked=0
+
+# Ethernet (preferred when it has an IP)
+for dev in /sys/class/net/e*; do
+    [ -e "$dev" ] || continue
+    [ "$(cat "$dev/operstate" 2>/dev/null)" = "up" ] || continue
+    if ip -4 addr show dev "${dev##*/}" | grep -q "inet "; then
+        printf "󰌘\n"
+        exit 0
+    fi
+    eth_linked=1
+done
+
 # Wi-Fi
-wifi_state=$(cat /sys/class/net/w*/operstate 2>/dev/null | head -n1)
+for dev in /sys/class/net/w*; do
+    [ -e "$dev" ] || continue
+    wlan=${dev##*/}
+    state=$(cat "$dev/operstate" 2>/dev/null)
 
-if [ "$wifi_state" = "up" ]; then
-    # Signal strength (0-100)
-    signal=$(awk '/^\s*w/ { print int($3 * 100 / 70) }' /proc/net/wireless 2>/dev/null)
+    if [ "$state" = "up" ]; then
+        # Link quality as 0-100
+        quality=$(awk -v d="$wlan:" '$1 == d { print int($3 * 100 / 70) }' /proc/net/wireless 2>/dev/null)
+        quality=${quality:-0}
 
-    case $signal in
-    [8-9][0-9] | 100) icon="󰤨" ;; # excellent
-    [6-7][0-9]) icon="󰤥" ;;       # good
-    [4-5][0-9]) icon="󰤢" ;;       # ok
-    [2-3][0-9]) icon="󰤟" ;;       # weak
-    *) icon="󰤯" ;;                # very weak
-    esac
-elif [ "$wifi_state" = "down" ]; then
-    # Check if the interface is just soft-blocked / disabled
-    if [ "$(cat /sys/class/net/w*/flags 2>/dev/null | head -n1)" = "0x1003" ]; then
-        icon="󰤫" # wifi disabled
-    else
-        icon="󰤮" # no connection
+        if [ "$quality" -ge 80 ]; then
+            icon="󰤨" # excellent
+        elif [ "$quality" -ge 60 ]; then
+            icon="󰤥" # good
+        elif [ "$quality" -ge 40 ]; then
+            icon="󰤢" # ok
+        elif [ "$quality" -ge 20 ]; then
+            icon="󰤟" # weak
+        else
+            icon="󰤯" # very weak
+        fi
+        printf "%s\n" "$icon"
+        exit 0
     fi
-else
-    icon=""
-fi
 
-# Ethernet
-eth_state=$(cat /sys/class/net/e*/operstate 2>/dev/null | head -n1)
-
-if [ "$eth_state" = "up" ]; then
-    # Has an IP?
-    if ip -4 addr show | grep -q "inet "; then
-        eth_icon="󰌘"
+    # Interface down: administratively down (bit 0x1 clear) = disabled/rfkill
+    flags=$(cat "$dev/flags" 2>/dev/null)
+    if [ -n "$flags" ] && [ $((flags & 1)) -eq 0 ]; then
+        printf "󰤫\n" # wifi disabled
     else
-        eth_icon="󰈁" # linked but no IP
+        printf "󰤮\n" # enabled but not connected
     fi
-else
-    eth_icon=""
-fi
+    exit 0
+done
 
-# --- Final output (prefer ethernet if both are up) ---
-if [ -n "$eth_icon" ]; then
-    printf "%s\n" "$eth_icon"
-elif [ -n "$icon" ]; then
-    printf "%s\n" "$icon"
+# No usable Wi-Fi interface
+if [ "$eth_linked" -eq 1 ]; then
+    printf "󰈁\n" # ethernet linked but no IP
 else
     printf "󰌙\n" # fully disconnected
 fi

@@ -1,16 +1,21 @@
 #!/bin/sh
-# Left click:  toggle between "09:41 PM" and "21:41 - 14"
+# Clock for dwmblocks-async: "󰥔 09:41 PM" / "󰥔 21:41 - 14"
+# Left click:  toggle between 12h time and 24h time + day of month
 # Right click: show the year calendar in a small popup terminal
 
 state="${XDG_RUNTIME_DIR:-/tmp}/sb-clock-alt"
 
 case "$BLOCK_BUTTON" in
-    1)  if [ -f "$state" ]; then rm -f "$state"; else : > "$state"; fi ;;
-    3)  setsid -f st -c floating -g 70x40 -e sh -c 'cal -y --color=always; read -r _' >/dev/null 2>&1 ;;
+1) if [ -f "$state" ]; then rm -f "$state"; else : >"$state"; fi ;;
+3) setsid -f st -c floating -g 70x40 -e sh -c \
+    'cal -y --color=always; printf "\npress any key to close"; stty -icanon -echo; dd bs=1 count=1 >/dev/null 2>&1' \
+    >/dev/null 2>&1 ;;
 esac
 
 if [ -f "$state" ]; then
-    date '+%H:%M - %d'
+    fmt='%H:%M - %d'
 else
-    date '+%I:%M %p'
+    fmt='%I:%M %p'
 fi
+
+printf "%s %s\n" "$(date "+$fmt")"

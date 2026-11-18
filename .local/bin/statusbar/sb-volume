@@ -1,70 +1,55 @@
 #!/bin/sh
+# Volume for dwmblocks-async: "󰕾 65%"
+# Usage: sb-volume [up|down|mute]  (for keybindings)
 
-# volume status for dwmblocks-async
+step=5
+signal=3
 
-# helpers
-get_vol() {
-  pamixer --get-volume
-}
+# Read state once
+vol=$(pamixer --get-volume)
+muted=$(pamixer --get-mute)
 
-is_muted() {
-  [ "$(pamixer --get-mute)" = "true" ]
-}
+refresh() { pkill -RTMIN+"$signal" dwmblocks; }
 
-# Dynamic Nerd Font icon
-get_icon() {
-  vol=$(get_vol)
-
-  if is_muted || [ "$vol" -eq 0 ]; then
-    echo "󰝟" # muted
-  elif [ "$vol" -le 30 ]; then
-    echo "󰕿" # low
-  elif [ "$vol" -le 60 ]; then
-    echo "󰖀" # medium
-  else
-    echo "󰕾" # high
-  fi
+# Re-read state after a change
+update_state() {
+  vol=$(pamixer --get-volume)
+  muted=$(pamixer --get-mute)
 }
 
 notify() {
-  # Only notify if notify-send exists
   command -v notify-send >/dev/null 2>&1 || return
 
-  vol=$(get_vol)
-  icon=$(get_icon)
-
-  if is_muted || [ "$vol" -eq 0 ]; then
-    notify-send \
-      -e \
+  if [ "$muted" = "true" ] || [ "$vol" -eq 0 ]; then
+    notify-send -e -u low \
       -h string:x-canonical-private-synchronous:volume_notif \
-      -u low \
       "Volume: Muted"
-
   else
-    notify-send \
-      -e \
+    notify-send -e -u low \
       -h int:value:"$vol" \
       -h string:x-canonical-private-synchronous:volume_notif \
-      -u low \
       "Volume: ${vol}%"
   fi
 }
 
-# actions
+# Actions
 inc() {
-  is_muted && pamixer -u
-  pamixer -i 5
+  [ "$muted" = "true" ] && pamixer -u
+  pamixer -i "$step"
+  update_state
   notify
 }
 
 dec() {
-  is_muted && pamixer -u
-  pamixer -d 5
+  [ "$muted" = "true" ] && pamixer -u
+  pamixer -d "$step"
+  update_state
   notify
 }
 
 toggle() {
   pamixer -t
+  update_state
   notify
 }
 
@@ -72,32 +57,43 @@ toggle() {
 case "$1" in
 up)
   inc
+  refresh
   exit
   ;;
 down)
   dec
+  refresh
   exit
   ;;
 mute)
   toggle
+  refresh
   exit
   ;;
 esac
 
-#  click handling (dwmblocks-async)
-case $BLOCK_BUTTON in
-1) toggle ;;                                    # left click  → mute/unmute
-3) setsid -f st -e wiremix >/dev/null 2>&1 & ;; # right → TUI
-4) inc ;;                                       # scroll up   → +5%
-5) dec ;;                                       # scroll down → -5%
+# Click handling (dwmblocks-async)
+case "$BLOCK_BUTTON" in
+1) toggle ;;                                  # left click   → mute/unmute
+3) setsid -f st -e wiremix >/dev/null 2>&1 ;; # right click  → TUI mixer
+4) inc ;;                                     # scroll up    → +5%
+5) dec ;;                                     # scroll down  → -5%
 esac
 
-#  statusbar output
-icon=$(get_icon)
-vol=$(get_vol)
-
-if is_muted || [ "$vol" -eq 0 ]; then
-  printf "%s" "$icon"
+# Icon
+if [ "$muted" = "true" ] || [ "$vol" -eq 0 ]; then
+  icon="󰝟"
+elif [ "$vol" -le 30 ]; then
+  icon="󰕿"
+elif [ "$vol" -le 60 ]; then
+  icon="󰖀"
 else
-  printf "%s %s%%" "$icon" "$vol"
+  icon="󰕾"
+fi
+
+# Output
+if [ "$muted" = "true" ] || [ "$vol" -eq 0 ]; then
+  printf "%s\n" "$icon"
+else
+  printf "%s %s%%\n" "$icon" "$vol"
 fi

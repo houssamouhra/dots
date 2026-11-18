@@ -1,7 +1,12 @@
 #!/bin/sh
-# Waybar-style disk block: "42% 󰋊"
-# Left click: notification with "X used out of Y" (the old tooltip)
+# Disk usage for dwmblocks-async: "󰋊 42%"
+# Left click: notification with "X used out of Y"
 
 path="/"
 
-df -B1 --output=used,size "$path" | awk 'NR==2 { printf "%d%% 󰋊\n", $1 / $2 * 100 }'
+case "$BLOCK_BUTTON" in
+1) notify-send "Disk ($path)" \
+    "$(df -h --output=used,size "$path" | awk 'NR==2 { printf "%s used out of %s", $1, $2 }')" ;;
+esac
+
+df -B1 --output=used,size "$path" | awk 'NR==2 { printf "󰋊 %d%%\n", $1 / $2 * 100 }'

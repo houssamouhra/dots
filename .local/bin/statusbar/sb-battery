@@ -1,21 +1,23 @@
 #!/bin/sh
+# Battery status for dwmblocks-async: "󰁹 85%"
+# Prints nothing when there is no battery (desktop).
 
-# Battery status for dwmblocks-async
-
-# Find first battery
 for bat in /sys/class/power_supply/BAT*; do
     [ -r "$bat/capacity" ] || continue
 
-    capacity=$(cat "$bat/capacity")
-    status=$(cat "$bat/status")
+    read -r capacity <"$bat/capacity"
+    read -r status <"$bat/status" 2>/dev/null
 
-    # Dynamic icon based on capacity + status
-    if [ "$status" = "Charging" ]; then
-        icon="󱘖"
-    elif [ "$status" = "Full" ]; then
+    case "$status" in
+    Charging)
+        icon="󰂄"
+        ;;
+    Full | "Not charging")
+        # Plugged in and not charging (full or held at a charge threshold)
         icon="󰁹"
-    else
-        # Discharging – change icon by percentage
+        ;;
+    *)
+        # Discharging / Unknown: icon by percentage
         if [ "$capacity" -ge 90 ]; then
             icon="󰁹"
         elif [ "$capacity" -ge 70 ]; then
@@ -29,11 +31,12 @@ for bat in /sys/class/power_supply/BAT*; do
         else
             icon="󰂎"
         fi
-    fi
+        ;;
+    esac
 
     printf "%s %s%%\n" "$icon" "$capacity"
     exit 0
 done
 
-# No battery found
-printf "󰂑 N/A\n"
+# No battery found: print nothing so the block is hidden
+exit 0

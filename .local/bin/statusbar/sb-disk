@@ -4,8 +4,4 @@
 
 path="/"
 
-case "$BLOCK_BUTTON" in
-1) notify-send "Disk ($path)" "$(df -h --output=used,size "$path" | awk 'NR==2 { print $1 " used out of " $2 }')" ;;
-esac
-
 df -B1 --output=used,size "$path" | awk 'NR==2 { printf "%d%% 󰋊\n", $1 / $2 * 100 }'
